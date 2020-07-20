@@ -54,15 +54,24 @@
         android:layout_marginTop="20dp"
         />
 
-    <TextView
-        android:id="@+id/response_text_view"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-       android:layout_below="@+id/update_button"
-        android:layout_centerHorizontal="true"
-        android:textSize="18sp"
-        android:layout_marginTop="50dp"
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_below="@+id/update_button"
+        android:layout_marginTop="30dp"
+        >
 
-        />
+        <TextView
+            android:id="@+id/response_text_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:textSize="18sp"
+            android:padding="8dp"
+            />
+
+    </ScrollView>
+
+
 
 </RelativeLayout>

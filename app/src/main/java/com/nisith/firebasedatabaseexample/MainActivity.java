@@ -1,11 +1,9 @@
 package com.nisith.firebasedatabaseexample;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -21,9 +19,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.HashMap;
-import java.util.Map;
-
 public class MainActivity extends AppCompatActivity {
 
     private EditText nameEditText, ageEditText;
@@ -33,25 +28,22 @@ public class MainActivity extends AppCompatActivity {
     private DatabaseReference childRef;
     private ValueEventListener valueEventListener;
     private ChildEventListener childEventListener;
-    private FirebaseDatabase firebaseDatabase;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        if (firebaseDatabase == null) {
-            firebaseDatabase =FirebaseDatabase.getInstance();
-        }
         setContentView(R.layout.activity_main);
         nameEditText = findViewById(R.id.name_edit_text);
         ageEditText = findViewById(R.id.age_edit_text);
         sendButton = findViewById(R.id.send_button);
         updateButton = findViewById(R.id.update_button);
         responseTextView = findViewById(R.id.response_text_view);
-        databaseReference = firebaseDatabase.getReference("users");
+        FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
+        databaseReference = firebaseDatabase.getReference("message");
         sendButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                addUser();
+                sendMessage();
             }
         });
 
@@ -64,69 +56,24 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (databaseReference != null){
-            childEventListener = databaseReference.addChildEventListener(new ChildEventListener() {
-                @Override
-                public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                    Log.d("ABCD","onChildAdded() :: "+snapshot);
-                    Log.d("ABCD","previousChildName :: "+previousChildName);
-                }
+        databaseReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                    String result = snapshot.getValue().toString();
+                    responseTextView.setText(result);
+            }
 
-                @Override
-                public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                    Log.d("ABCD","onChildChanged() :: "+snapshot);
-                }
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
 
-                @Override
-                public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                    Log.d("ABCD","onChildRemoved() :: "+snapshot);
-                }
-
-                @Override
-                public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError error) {
-
-                }
-            });
-//            valueEventListener = databaseReference.addValueEventListener(new ValueEventListener() {
-//                @Override
-//                public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                   Log.d("ABCD", "valueEventListener is trigger");
-//                }
-//
-//                @Override
-//                public void onCancelled(@NonNull DatabaseError error) {
-//                    Toast.makeText(MainActivity.this, error.getMessage(), Toast.LENGTH_SHORT).show();
-//                }
-//            });
-        }
+            }
+        });
     }
 
 
-    private void addUser(){
-        String name = nameEditText.getText().toString().trim();
-        String age = ageEditText.getText().toString();
-        User user = new User(name, age);
-        if (databaseReference != null){
-            databaseReference.child(databaseReference.push().getKey()).setValue(user)
-                    .addOnSuccessListener(new OnSuccessListener<Void>() {
-                        @Override
-                        public void onSuccess(Void aVoid) {
-                            Toast.makeText(MainActivity.this, "Data Send Successfully", Toast.LENGTH_SHORT).show();
-                        }
-                    })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(MainActivity.this, "Error: "+e.getMessage(), Toast.LENGTH_LONG).show();
-                        }
-                    });
-        }
-
+    private void sendMessage(){
+        String message = nameEditText.getText().toString();
+        databaseReference.setValue(message);
     }
 
 
@@ -134,10 +81,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onPause() {
         super.onPause();
       if (databaseReference != null){
-//          databaseReference.removeEventListener(valueEventListener);
+          databaseReference.removeEventListener(valueEventListener);
       }
       if (databaseReference != null){
-          databaseReference.removeEventListener(childEventListener);
+//          databaseReference.removeEventListener(childEventListener);
       }
 
     }
